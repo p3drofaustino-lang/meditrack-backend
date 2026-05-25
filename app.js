@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 
+const routes = require('./routes');
+
 const app = express();
 const { PORT = 3000 } = process.env;
 
@@ -14,9 +16,7 @@ mongoose.connect('mongodb://localhost:27017/meditrackdb')
     console.error('MongoDB connection error:', err);
   });
 
-app.get('/', (req, res) => {
-  res.send({ message: 'MediTrack API is running' });
-});
+app.use(routes);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
