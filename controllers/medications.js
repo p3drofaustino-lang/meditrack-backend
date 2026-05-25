@@ -1,9 +1,17 @@
 const SavedMedication = require('../models/SavedMedication');
 
+const {
+  ERROR_BAD_REQUEST,
+  ERROR_NOT_FOUND,
+  ERROR_SERVER,
+} = require('../utils/errors');
+
 module.exports.getMedications = (req, res) => {
   SavedMedication.find({})
     .then((medications) => res.send(medications))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch(() => {
+      res.status(ERROR_SERVER).send({ message: 'Server error' });
+    });
 };
 
 module.exports.createMedication = (req, res) => {
@@ -28,17 +36,39 @@ module.exports.createMedication = (req, res) => {
     owner: req.user._id,
   })
     .then((medication) => res.status(201).send(medication))
-    .catch((err) => res.status(400).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res
+          .status(ERROR_BAD_REQUEST)
+          .send({ message: 'Invalid medication data' });
+      }
+
+      return res
+        .status(ERROR_SERVER)
+        .send({ message: 'Server error' });
+    });
 };
 
 module.exports.deleteMedication = (req, res) => {
   SavedMedication.findByIdAndDelete(req.params.medicationId)
     .then((medication) => {
       if (!medication) {
-        return res.status(404).send({ message: 'Medication not found' });
+        return res
+          .status(ERROR_NOT_FOUND)
+          .send({ message: 'Medication not found' });
       }
 
       return res.send({ message: 'Medication deleted' });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res
+          .status(ERROR_BAD_REQUEST)
+          .send({ message: 'Invalid medication ID' });
+      }
+
+      return res
+        .status(ERROR_SERVER)
+        .send({ message: 'Server error' });
+    });
 };
