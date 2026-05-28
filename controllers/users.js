@@ -5,6 +5,7 @@ const User = require('../models/User');
 const {
   ERROR_BAD_REQUEST,
   ERROR_UNAUTHORIZED,
+  ERROR_NOT_FOUND,
   ERROR_CONFLICT,
   ERROR_SERVER,
 } = require('../utils/errors');
@@ -76,5 +77,25 @@ module.exports.login = (req, res) => {
       return res
         .status(ERROR_SERVER)
         .send({ message: 'Server error' });
+    });
+};
+
+module.exports.getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(ERROR_NOT_FOUND)
+          .send({ message: 'User not found' });
+      }
+
+      return res.send({
+        _id: user._id,
+        email: user.email,
+        name: user.name,
+      });
+    })
+    .catch(() => {
+      res.status(ERROR_SERVER).send({ message: 'Server error' });
     });
 };
