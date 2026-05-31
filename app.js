@@ -1,12 +1,20 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
+const expressWinston = require('express-winston');
+const winston = require('winston');
 const routes = require('./routes');
 
 const app = express();
 const { PORT = 3000 } = process.env;
 
 app.use(express.json());
+
+app.use(expressWinston.logger({
+  transports: [
+    new winston.transports.File({ filename: 'logs/request.log' }),
+  ],
+  format: winston.format.json(),
+}));
 
 mongoose.connect('mongodb://localhost:27017/meditrackdb')
   .then(() => {
@@ -17,6 +25,13 @@ mongoose.connect('mongodb://localhost:27017/meditrackdb')
   });
 
 app.use(routes);
+
+app.use(expressWinston.errorLogger({
+  transports: [
+    new winston.transports.File({ filename: 'logs/error.log' }),
+  ],
+  format: winston.format.json(),
+}));
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
