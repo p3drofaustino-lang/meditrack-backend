@@ -6,8 +6,13 @@ const {
   deleteMedication,
 } = require('../controllers/medications');
 
+const {
+  validateCreateMedication,
+  validateMedicationId,
+} = require('../middlewares/validation');
+
 router.get('/medications', getMedications);
-router.post('/medications', createMedication);
-router.delete('/medications/:medicationId', deleteMedication);
+router.post('/medications', validateCreateMedication, createMedication);
+router.delete('/medications/:medicationId', validateMedicationId, deleteMedication);
 
 module.exports = router;

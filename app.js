@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const expressWinston = require('express-winston');
 const winston = require('winston');
+const { errors } = require('celebrate');
+
 const routes = require('./routes');
 
 const app = express();
@@ -25,6 +27,8 @@ mongoose.connect('mongodb://localhost:27017/meditrackdb')
   });
 
 app.use(routes);
+
+app.use(errors());
 
 app.use(expressWinston.errorLogger({
   transports: [
