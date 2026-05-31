@@ -2,6 +2,7 @@ const SavedMedication = require('../models/SavedMedication');
 
 const {
   ERROR_BAD_REQUEST,
+  ERROR_FORBIDDEN,
   ERROR_NOT_FOUND,
   ERROR_SERVER,
 } = require('../utils/errors');
@@ -50,7 +51,7 @@ module.exports.createMedication = (req, res) => {
 };
 
 module.exports.deleteMedication = (req, res) => {
-  SavedMedication.findByIdAndDelete(req.params.medicationId)
+  SavedMedication.findById(req.params.medicationId).select('+owner')
     .then((medication) => {
       if (!medication) {
         return res
@@ -58,7 +59,14 @@ module.exports.deleteMedication = (req, res) => {
           .send({ message: 'Medication not found' });
       }
 
-      return res.send({ message: 'Medication deleted' });
+      if (medication.owner.toString() !== req.user._id) {
+        return res
+          .status(ERROR_FORBIDDEN)
+          .send({ message: 'You are not allowed to delete this medication' });
+      }
+
+      return SavedMedication.findByIdAndDelete(req.params.medicationId)
+        .then(() => res.send({ message: 'Medication deleted' }));
     })
     .catch((err) => {
       if (err.name === 'CastError') {
