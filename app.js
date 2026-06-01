@@ -8,7 +8,10 @@ const routes = require('./routes');
 const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
-const { PORT = 3000 } = process.env;
+const {
+  PORT = 3000,
+  MONGODB_URI = 'mongodb://localhost:27017/meditrackdb',
+} = process.env;
 
 app.use(express.json());
 
@@ -19,7 +22,7 @@ app.use(expressWinston.logger({
   format: winston.format.json(),
 }));
 
-mongoose.connect('mongodb://localhost:27017/meditrackdb')
+mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
   })
