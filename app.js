@@ -5,6 +5,7 @@ const winston = require('winston');
 const { errors } = require('celebrate');
 
 const routes = require('./routes');
+const errorHandler = require('./middlewares/errorHandler');
 
 const app = express();
 const { PORT = 3000 } = process.env;
@@ -36,6 +37,8 @@ app.use(expressWinston.errorLogger({
   ],
   format: winston.format.json(),
 }));
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

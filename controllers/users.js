@@ -1,18 +1,18 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const AppError = require('../utils/AppError');
 
 const {
   ERROR_BAD_REQUEST,
   ERROR_UNAUTHORIZED,
   ERROR_NOT_FOUND,
   ERROR_CONFLICT,
-  ERROR_SERVER,
 } = require('../utils/errors');
 
 const { JWT_SECRET = 'dev-secret' } = process.env;
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const { email, password, name } = req.body;
 
   bcrypt.hash(password, 10)
@@ -26,36 +26,36 @@ module.exports.createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(ERROR_BAD_REQUEST)
-          .send({ message: 'Invalid user data' });
+        return next(new AppError('Invalid user data', ERROR_BAD_REQUEST));
       }
 
       if (err.code === 11000) {
-        return res
-          .status(ERROR_CONFLICT)
-          .send({ message: 'Email already exists' });
+        return next(new AppError('Email already exists', ERROR_CONFLICT));
       }
 
-      return res
-        .status(ERROR_SERVER)
-        .send({ message: 'Server error' });
+      return next(err);
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('InvalidCredentials'));
+        return Promise.reject(new AppError(
+          'Invalid email or password',
+          ERROR_UNAUTHORIZED,
+        ));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('InvalidCredentials'));
+            return Promise.reject(new AppError(
+              'Invalid email or password',
+              ERROR_UNAUTHORIZED,
+            ));
           }
 
           const token = jwt.sign(
@@ -67,26 +67,14 @@ module.exports.login = (req, res) => {
           return res.send({ token });
         });
     })
-    .catch((err) => {
-      if (err.message === 'InvalidCredentials') {
-        return res
-          .status(ERROR_UNAUTHORIZED)
-          .send({ message: 'Invalid email or password' });
-      }
-
-      return res
-        .status(ERROR_SERVER)
-        .send({ message: 'Server error' });
-    });
+    .catch(next);
 };
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        return res
-          .status(ERROR_NOT_FOUND)
-          .send({ message: 'User not found' });
+        return next(new AppError('User not found', ERROR_NOT_FOUND));
       }
 
       return res.send({
@@ -95,7 +83,5 @@ module.exports.getCurrentUser = (req, res) => {
         name: user.name,
       });
     })
-    .catch(() => {
-      res.status(ERROR_SERVER).send({ message: 'Server error' });
-    });
+    .catch(next);
 };

@@ -1,21 +1,19 @@
 const SavedMedication = require('../models/SavedMedication');
+const AppError = require('../utils/AppError');
 
 const {
   ERROR_BAD_REQUEST,
   ERROR_FORBIDDEN,
   ERROR_NOT_FOUND,
-  ERROR_SERVER,
 } = require('../utils/errors');
 
-module.exports.getMedications = (req, res) => {
+module.exports.getMedications = (req, res, next) => {
   SavedMedication.find({})
     .then((medications) => res.send(medications))
-    .catch(() => {
-      res.status(ERROR_SERVER).send({ message: 'Server error' });
-    });
+    .catch(next);
 };
 
-module.exports.createMedication = (req, res) => {
+module.exports.createMedication = (req, res, next) => {
   const {
     keyword,
     name,
@@ -39,30 +37,25 @@ module.exports.createMedication = (req, res) => {
     .then((medication) => res.status(201).send(medication))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(ERROR_BAD_REQUEST)
-          .send({ message: 'Invalid medication data' });
+        return next(new AppError('Invalid medication data', ERROR_BAD_REQUEST));
       }
 
-      return res
-        .status(ERROR_SERVER)
-        .send({ message: 'Server error' });
+      return next(err);
     });
 };
 
-module.exports.deleteMedication = (req, res) => {
+module.exports.deleteMedication = (req, res, next) => {
   SavedMedication.findById(req.params.medicationId).select('+owner')
     .then((medication) => {
       if (!medication) {
-        return res
-          .status(ERROR_NOT_FOUND)
-          .send({ message: 'Medication not found' });
+        return next(new AppError('Medication not found', ERROR_NOT_FOUND));
       }
 
       if (medication.owner.toString() !== req.user._id) {
-        return res
-          .status(ERROR_FORBIDDEN)
-          .send({ message: 'You are not allowed to delete this medication' });
+        return next(new AppError(
+          'You are not allowed to delete this medication',
+          ERROR_FORBIDDEN,
+        ));
       }
 
       return SavedMedication.findByIdAndDelete(req.params.medicationId)
@@ -70,13 +63,9 @@ module.exports.deleteMedication = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(ERROR_BAD_REQUEST)
-          .send({ message: 'Invalid medication ID' });
+        return next(new AppError('Invalid medication ID', ERROR_BAD_REQUEST));
       }
 
-      return res
-        .status(ERROR_SERVER)
-        .send({ message: 'Server error' });
+      return next(err);
     });
 };
