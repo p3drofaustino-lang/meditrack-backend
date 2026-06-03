@@ -15,6 +15,10 @@ The backend provides:
 * Request validation
 * Centralized error handling
 
+## Links
+
+Backend API: https://meditrack.twilightparadox.com
+
 ## Technologies
 
 * Node.js
@@ -117,6 +121,20 @@ npm start
 
 ## Project Status
 
-In development.
+Backend deployment completed.
 
-Backend completed as part of the TripleTen Web Development Final Project.
+The API is deployed on Google Cloud VM with:
+- MongoDB
+- PM2
+- Nginx
+- HTTPS
+- SSL certificates
+
+Developed as part of Phase 2 of the TripleTen Web Development Final Project.
+
+## Author
+
+Pedro Faustino
+
+GitHub: https://github.com/p3drofaustino-lang
+
