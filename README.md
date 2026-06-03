@@ -17,7 +17,7 @@ The backend provides:
 
 ## Links
 
-Backend API: https://meditrack.twilightparadox.com
+Backend API: https://api.meditrack.twilightparadox.com
 
 ## Technologies
 
