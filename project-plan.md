@@ -2,7 +2,7 @@
 
 ## Description
 
-MediTrack is a full-stack web application for personal medication organization. The application allows users to search medications using a third-party API and view basic information about each medication.
+MediTrack is a full-stack web application for personal medication organization. The application allows users to search medications using a third-party API, compare different medication formulations, and view basic information about each medication.
 
 In future phases, authenticated users will be able to save medications to a personal list, add dosage frequency, notes, and mark medications as active or inactive.
 
