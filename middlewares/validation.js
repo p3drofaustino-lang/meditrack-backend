@@ -27,6 +27,13 @@ module.exports.validateCreateMedication = celebrate({
   }),
 });
 
+module.exports.validateUpdateMedication = celebrate({
+  body: Joi.object().keys({
+    notes: Joi.string().allow('').max(500),
+    frequency: Joi.string().allow('').max(100),
+  }),
+});
+
 module.exports.validateMedicationId = celebrate({
   params: Joi.object().keys({
     medicationId: Joi.string().hex().length(24).required(),
