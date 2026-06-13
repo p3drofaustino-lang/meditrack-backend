@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const expressWinston = require('express-winston');
 const winston = require('winston');
 const { errors } = require('celebrate');
@@ -13,6 +14,7 @@ const {
   MONGODB_URI = 'mongodb://localhost:27017/meditrackdb',
 } = process.env;
 
+app.use(cors());
 app.use(express.json());
 
 app.use(expressWinston.logger({
