@@ -5,6 +5,7 @@ const {
   ERROR_BAD_REQUEST,
   ERROR_FORBIDDEN,
   ERROR_NOT_FOUND,
+  ERROR_CONFLICT,
 } = require('../utils/errors');
 
 module.exports.getMedications = (req, res, next) => {
@@ -24,20 +25,43 @@ module.exports.createMedication = (req, res, next) => {
     frequency,
   } = req.body;
 
-  SavedMedication.create({
-    keyword,
-    name,
-    synonym,
-    tty,
-    rxcui,
-    notes,
-    frequency,
+  SavedMedication.findOne({
     owner: req.user._id,
+    rxcui,
   })
+    .then((existingMedication) => {
+      if (existingMedication) {
+        return Promise.reject(new AppError(
+          'Medication already saved',
+          ERROR_CONFLICT,
+        ));
+      }
+
+      return SavedMedication.create({
+        keyword,
+        name,
+        synonym,
+        tty,
+        rxcui,
+        notes,
+        frequency,
+        owner: req.user._id,
+      });
+    })
     .then((medication) => res.status(201).send(medication))
     .catch((err) => {
+      if (err.code === 11000) {
+        return next(new AppError(
+          'Medication already saved',
+          ERROR_CONFLICT,
+        ));
+      }
+
       if (err.name === 'ValidationError') {
-        return next(new AppError('Invalid medication data', ERROR_BAD_REQUEST));
+        return next(new AppError(
+          'Invalid medication data',
+          ERROR_BAD_REQUEST,
+        ));
       }
 
       return next(err);
