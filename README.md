@@ -27,17 +27,11 @@ This project was developed as part of the TripleTen Web Development Final Projec
 
 ## Links
 
-Backend API:
+Backend API: https://api.meditrack.twilightparadox.com
 
-```txt
-https://api.meditrack.twilightparadox.com
-```
+Frontend live site: https://meditrack.twilightparadox.com
 
-Frontend repository:
-
-```txt
-To be added
-```
+Frontend repository: https://github.com/p3drofaustino-lang/meditrack-frontend
 
 ## Technologies
 
