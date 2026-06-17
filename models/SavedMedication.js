@@ -46,7 +46,7 @@ const savedMedicationSchema = new mongoose.Schema({
 
 savedMedicationSchema.index(
   { owner: 1, rxcui: 1 },
-  { unique: true }
+  { unique: true },
 );
 
 module.exports = mongoose.model('savedMedication', savedMedicationSchema);

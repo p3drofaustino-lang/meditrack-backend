@@ -100,22 +100,27 @@ module.exports.updateMedication = (req, res, next) => {
   SavedMedication.findById(req.params.medicationId).select('+owner')
     .then((medication) => {
       if (!medication) {
-        return next(new AppError('Medication not found', ERROR_NOT_FOUND));
+        return Promise.reject(
+          new AppError('Medication not found', ERROR_NOT_FOUND),
+        );
       }
 
       if (medication.owner.toString() !== req.user._id) {
-        return next(new AppError(
-          'You are not allowed to edit this medication',
-          ERROR_FORBIDDEN,
-        ));
+        return Promise.reject(
+          new AppError(
+            'You are not allowed to edit this medication',
+            ERROR_FORBIDDEN,
+          ),
+        );
       }
 
-      medication.notes = notes;
-      medication.frequency = frequency;
-
-      return medication.save()
-        .then((updatedMedication) => res.send(updatedMedication));
+      return SavedMedication.findByIdAndUpdate(
+        req.params.medicationId,
+        { notes, frequency },
+        { new: true, runValidators: true },
+      );
     })
+    .then((updatedMedication) => res.send(updatedMedication))
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new AppError('Invalid medication ID', ERROR_BAD_REQUEST));
