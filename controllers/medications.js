@@ -31,10 +31,12 @@ module.exports.createMedication = (req, res, next) => {
   })
     .then((existingMedication) => {
       if (existingMedication) {
-        return Promise.reject(new AppError(
-          'Medication already saved',
-          ERROR_CONFLICT,
-        ));
+        return Promise.reject(
+          new AppError(
+            'Medication already saved',
+            ERROR_CONFLICT,
+          ),
+        );
       }
 
       return SavedMedication.create({
